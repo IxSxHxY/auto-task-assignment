@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Assignment System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        input, select, button, textarea {
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 5px 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Task Assignment System</h1>
+
+        <h2>Add New Task</h2>
+        <input type="text" id="taskName" placeholder="Task Name">
+        <select id="taskDepartment">
+            <option value="">Select Department</option>
+            <option value="IT">IT</option>
+            <option value="Human Resource">Human Resource</option>
+            <option value="Design">Design</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Finance">Finance</option>
+        </select>
+        <input type="number" id="taskPeople" placeholder="Number of People Needed">
+        <textarea id="taskDetails" placeholder="Task Details"></textarea>
+        <button onclick="addTask()">Add Task</button>
+
+        <h2>Add New Employee</h2>
+        <input type="text" id="employeeName" placeholder="Employee Name">
+        <input type="email" id="employeeEmail" placeholder="Employee Email">
+        <select id="employeeDepartment">
+            <option value="">Select Department</option>
+            <option value="IT">IT</option>
+            <option value="Human Resource">Human Resource</option>
+            <option value="Design">Design</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Finance">Finance</option>
+        </select>
+        <button onclick="addEmployee()">Add Employee</button>
+
+        <h2>Tasks</h2>
+        <table id="taskTable">
+            <tr>
+                <th>Task Name</th>
+                <th>Department</th>
+                <th>People Needed</th>
+                <th>Status</th>
+                <th>Assigned Employees</th>
+                <th>Details</th>
+                <!-- <th>Chat Group</th> -->
+                <th>Actions</th>
+            </tr>
+        </table>
+        <div id="taskPagination" class="pagination"></div>
+
+        <h2>Employees</h2>
+        <table id="employeeTable">
+            <tr>
+                <th>Employee Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Availability</th>
+                <th>Actions</th>
+            </tr>
+        </table>
+        <div id="employeePagination" class="pagination"></div>
+
+        <button style="margin-top: 50px;" onclick="autoAssignTasks()">Auto Assign Tasks</button>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div id="editTaskModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Task</h2>
+            <input type="hidden" id="editTaskId">
+            <input type="text" id="editTaskName" placeholder="Task Name">
+            <select id="editTaskDepartment">
+                <option value="">Select Department</option>
+                <option value="IT">IT</option>
+                <option value="Human Resource">Human Resource</option>
+                <option value="Design">Design</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Finance">Finance</option>
+            </select>
+            <input type="number" id="editTaskPeople" placeholder="Number of People Needed" readonly>
+            <textarea id="editTaskDetails" placeholder="Task Details"></textarea>
+            <button onclick="submitEditTask()">Update Task</button>
+        </div>
+    </div>
+
+    <!-- Edit Employee Modal -->
+    <div id="editEmployeeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Employee</h2>
+            <input type="hidden" id="editEmployeeId">
+            <input type="text" id="editEmployeeName" placeholder="Employee Name">
+            <select id="editEmployeeDepartment">
+                <option value="">Select Department</option>
+                <option value="IT">IT</option>
+                <option value="Human Resource">Human Resource</option>
+                <option value="Design">Design</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Finance">Finance</option>
+            </select>
+            <select id="editEmployeeAvailability">
+              <option value="available">Available</option>
+              <option value="unavailable">Unavailable</option>
+          </select>
+            <button onclick="submitEditEmployee()">Update Employee</button>
+        </div>
+    </div>
+
+    <script>
+        let currentTaskPage = 1;
+        let currentEmployeePage = 1;
+        const pageSize = 10;
+
+        function addTask() {
+            const name = document.getElementById('taskName').value;
+            const department = document.getElementById('taskDepartment').value;
+            const people = document.getElementById('taskPeople').value;
+            const details = document.getElementById('taskDetails').value;
+
+            if (!name || !department || !people || !details) {
+                alert('Please fill all fields for the task.');
+                return;
+            }
+            google.script.run.withSuccessHandler(() => {
+              updateTaskTable();
+              window.location.reload();
+            }).addTaskToSheet(name, department, people, details);
+
+            // google.script.run.withSuccessHandler(updateTaskTable).addTaskToSheet(name, department, people, details);
+
+            // Clear input fields
+            document.getElementById('taskName').value = '';
+            document.getElementById('taskDepartment').value = '';
+            document.getElementById('taskPeople').value = '';
+            document.getElementById('taskDetails').value = '';
+        }
+
+        function addEmployee() {
+            const name = document.getElementById('employeeName').value;
+            const email = document.getElementById('employeeEmail').value;
+            const department = document.getElementById('employeeDepartment').value;
+
+            if (!name || !email || !department) {
+                alert('Please fill all fields for the employee.');
+                return;
+            }
+
+            google.script.run.withSuccessHandler(() => {
+                updateEmployeeTable();
+                window.location.reload();
+            })
+            .withFailureHandler(function(error) {
+                alert('Error: ' + error.message);
+            })
+            .addEmployeeToSheet(name, email, department);
+
+            // google.script.run.withSuccessHandler(updateEmployeeTable)
+            //     .withFailureHandler(function(error) {
+            //         alert('Error: ' + error.message);
+            //     })
+            //     .addEmployeeToSheet(name, email, department);
+
+            // Clear input fields
+            document.getElementById('employeeName').value = '';
+            document.getElementById('employeeEmail').value = '';
+            document.getElementById('employeeDepartment').value = '';
+        }
+
+        
+
+        function updateTables(response) {
+            updateTaskTable(response.tasks);
+            updateEmployeeTable(response.employees);      
+        }
+
+        function autoAssignTasks() {
+          google.script.run.withSuccessHandler(() => {
+              updateTables();
+              window.location.reload();
+          }).autoAssignTasks();
+          // google.script.run.withSuccessHandler(updateTables).autoAssignTasks();
+        }
+
+        function completeTask(taskId) {
+          google.script.run.withSuccessHandler(() => {
+              updateTables();
+              window.location.reload();
+          }).completeTask(taskId);
+        }
+
+        function updateTaskTable(response) {
+            const table = document.getElementById('taskTable');
+            const pagination = document.getElementById('taskPagination');
+
+            // Clear existing rows except header
+            while (table.rows.length > 1) {
+                table.deleteRow(1);
+            }
+            console.log(response);
+            response.tasks.forEach(task => {
+                const row = table.insertRow(-1);
+                row.insertCell(0).textContent = task.name;
+                row.insertCell(1).textContent = task.department;
+                row.insertCell(2).textContent = task.peopleNeeded;
+                row.insertCell(3).textContent = task.status;
+                row.insertCell(4).textContent = task.assignedEmployees.join(', ');
+                row.insertCell(5).textContent = task.details;
+                // const chatCell = row.insertCell(6);
+                // if (task.chatUrl) {
+                //     const chatLink = document.createElement('a');
+                //     chatLink.href = task.chatUrl;
+                //     chatLink.textContent = 'Join Chat';
+                //     chatLink.target = '_blank';
+                //     chatCell.appendChild(chatLink);
+                // } else {
+                //     chatCell.textContent = 'N/A';
+                // }
+                const actionsCell = row.insertCell(6);
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Edit';
+                editButton.onclick = () => openEditTaskModal(task);
+                actionsCell.appendChild(editButton);
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => deleteTask(task.id);
+                actionsCell.appendChild(deleteButton);
+                if (task.status == "In Progress") {
+                  const completeButton = document.createElement('button');
+                  completeButton.textContent = 'Completed';
+                  completeButton.onclick = () => completeTask(task.id);
+                  actionsCell.appendChild(completeButton);
+                }
+            });
+
+            updatePagination(pagination, response.currentPage, response.totalPages, loadTasks);
+        }
+
+        function updateEmployeeTable(response) {
+            const table = document.getElementById('employeeTable');
+            const pagination = document.getElementById('employeePagination');
+
+            // Clear existing rows except header
+            while (table.rows.length > 1) {
+                table.deleteRow(1);
+            }
+            console.log(response);
+            response.employees.forEach(employee => {
+                const row = table.insertRow(-1);
+                row.insertCell(0).textContent = employee.name;
+                row.insertCell(1).textContent = employee.email;
+                row.insertCell(2).textContent = employee.department;
+                row.insertCell(3).textContent = employee.availability;
+                const actionsCell = row.insertCell(4);
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Edit';
+                editButton.onclick = () => openEditEmployeeModal(employee);
+                actionsCell.appendChild(editButton);
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => deleteEmployee(employee.id);
+                actionsCell.appendChild(deleteButton);
+            });
+
+            updatePagination(pagination, response.currentPage, response.totalPages, loadEmployees);
+        }
+
+        function updatePagination(container, currentPage, totalPages, loadFunction) {
+            container.innerHTML = '';
+            if (currentPage > 1) {
+                const prevButton = document.createElement('button');
+                prevButton.style.width = '100px';
+                prevButton.textContent = 'Previous';
+                prevButton.onclick = () => loadFunction(currentPage - 1);
+                container.appendChild(prevButton);
+            }
+            const pageInfo = document.createElement('span');
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+            container.appendChild(pageInfo);
+            if (currentPage < totalPages) {
+                const nextButton = document.createElement('button');
+                nextButton.style.width = '100px';
+                nextButton.textContent = 'Next';
+                nextButton.onclick = () => loadFunction(currentPage + 1);
+                container.appendChild(nextButton);
+            }
+        }
+
+        function loadTasks(page) {
+            currentTaskPage = page;
+            google.script.run.withSuccessHandler(updateTaskTable).getTasks(page, pageSize);
+        }
+
+        function loadEmployees(page) {
+            currentEmployeePage = page;
+            google.script.run.withSuccessHandler(updateEmployeeTable).getEmployees(page, pageSize);
+        }
+
+        function openEditTaskModal(task) {
+            const modal = document.getElementById('editTaskModal');
+            document.getElementById('editTaskId').value = task.id;
+            document.getElementById('editTaskName').value = task.name;
+            document.getElementById('editTaskDepartment').value = task.department;
+            document.getElementById('editTaskPeople').value = task.peopleNeeded;
+            document.getElementById('editTaskDetails').value = task.details;
+            // document.getElementById('editTaskStatus').value = task.status;
+            modal.style.display = 'block';
+        }
+
+        function submitEditTask() {
+            const id = document.getElementById('editTaskId').value;
+            const name = document.getElementById('editTaskName').value;
+            const department = document.getElementById('editTaskDepartment').value;
+            // const peopleNeeded = document.getElementById('editTaskPeople').value;
+            const details = document.getElementById('editTaskDetails').value;
+
+            google.script.run.withSuccessHandler(response => {
+                updateTaskTable(response);
+                closeModal('editTaskModal');
+            }).editTask(id, name, department, details);
+        }
+
+        function openEditEmployeeModal(employee) {
+            const modal = document.getElementById('editEmployeeModal');
+            document.getElementById('editEmployeeId').value = employee.id;
+            document.getElementById('editEmployeeName').value = employee.name;
+            document.getElementById('editEmployeeDepartment').value = employee.department;
+            document.getElementById('editEmployeeAvailability').value = employee.availability;
+            if (employee.assignedTaskId) {
+              document.getElementById('editEmployeeAvailability').style.display = 'none'
+            } else {
+              document.getElementById('editEmployeeAvailability').style.display = 'block'
+            }
+            
+            // document.getElementById('editEmployeeAvailability').readonly = employee.assignedTaskId ? true : false
+            
+            modal.style.display = 'block';
+        }
+
+        function submitEditEmployee() {
+            const id = document.getElementById('editEmployeeId').value;
+            const name = document.getElementById('editEmployeeName').value;
+            const department = document.getElementById('editEmployeeDepartment').value;
+            const availability = document.getElementById('editEmployeeAvailability').value;
+            google.script.run.withSuccessHandler(response => {
+                updateEmployeeTable(response);
+                closeModal('editEmployeeModal');
+            }).editEmployee(id, name, department, availability);
+        }
+
+        function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                google.script.run.withSuccessHandler(updateTables).deleteTask(taskId);
+            }
+        }
+
+        function deleteEmployee(employeeId) {
+            if (confirm('Are you sure you want to delete this employee?')) {
+                google.script.run.withSuccessHandler(updateEmployeeTable)
+                    .withFailureHandler(function(error) {
+                        alert('Error: ' + error.message);
+                    })
+                    .deleteEmployee(employeeId);
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking on <span> (x)
+        document.querySelectorAll('.close').forEach(closeBtn => {
+            closeBtn.onclick = function() {
+                this.closest('.modal').style.display = 'none';
+            }
+        });
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Initial load of tasks and employees
+        loadTasks(currentTaskPage);
+        loadEmployees(currentEmployeePage);
+
+        // Refresh data every 30 seconds
+        setInterval(() => {
+            loadTasks(currentTaskPage);
+            loadEmployees(currentEmployeePage);
+        }, 30000);
+    </script>
+</body>
+</html>
