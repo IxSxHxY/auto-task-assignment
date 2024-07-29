@@ -2,4 +2,4 @@
 
 This app is created for automatic task assignment which can help easing the burden of project manager on assigning the tasks.
 
-Link to the app: [Click me](https://script.google.com/macros/s/AKfycbzu3vB_azdctqp76NIQPJ2egL0qpa5KC5ypOFXWoQ04bN9NGe4jj6fSqU62d09jGOym/exec)
+Link to the app: [Click Me](https://script.google.com/macros/s/AKfycbzhp8eQnLcuW3iUnD7E_u0fnU_d3S1q4HInvh76LvsdG35PIz7W3Zg_jjGkcsf6nMY0/exec)
